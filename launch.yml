@@ -1,0 +1,53 @@
+- name: Container testing
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Create a directory if it does not exist
+      ansible.builtin.file:
+        path: /data
+        state: directory
+        mode: '0755'        
+
+    - name: Create a directory for an applications
+      ansible.builtin.file:
+        path: "/data/{{ item.value.name }}"
+        state: directory
+        mode: '0755'
+      loop: "{{lookup('ansible.builtin.dict',app)}}" 
+      #when: "{{ inventory_hostname }} == {{ item.value.host }}"
+
+    - name: Genrate the sample version file
+      ansible.builtin.template:
+        src: version.j2
+        dest: "/data/{{ item.value.name }}/version.html"
+      loop: "{{lookup('ansible.builtin.dict',app)}}"
+      #when: "{{ inventory_hostname }}  == {{ item.value.host }}"
+
+    - name: launch a container
+      containers.podman.podman_container:
+        name: "nginx_container_{{ item.value.name }}"
+        image: docker.io/nginx:stable-alpine3.17-slim
+        state: started
+        ports:
+          - "{{item.value.port}}:80"
+        volumes:
+          - "/data/{{ item.value.name }}:/usr/share/nginx/html"
+        recreate: true
+      loop: "{{lookup('ansible.builtin.dict',app)}}"  
+
+    - name: Gather facts for all containers
+      containers.podman.podman_container_info:
+      register: info
+    
+    - debug:
+        msg: "{{item.Name}}"
+      loop: "{{info.containers}}" 
+
+
+#    - debug:
+#        msg: "{{hostvars[inventory_hostname]['app']|map(attribute='name')|list}}"
+
+#    - debug:
+#        msg: "{{item}}"
+#      loop: "{{ hostvars[inventory_hostname]['app']|map(attribute='version')|list}}"  

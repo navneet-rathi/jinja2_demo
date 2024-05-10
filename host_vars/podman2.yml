@@ -1,0 +1,21 @@
+app:
+  app2:
+    name: app2
+    version: v1
+    port: 8082
+    host: podman2
+  aap4:
+    name: app4  
+    version: v1
+    port: 8084
+    host: podman2
+  aap6:
+    name: app6  
+    version: v2
+    port: 8086
+    host: podman2
+  aap8:
+    name: app8  
+    version: v3_beta
+    port: 8088
+    host: podman2

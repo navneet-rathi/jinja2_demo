@@ -1,0 +1,33 @@
+---
+- name: Get the version of softwares
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Get the version of avalable application
+      ansible.builtin.uri:
+        url: "http://{{ item.value.host }}:{{item.value.port}}/version.html"
+        return_content: true
+      register: versioninfo
+      delegate_to: localhost
+      failed_when: versioninfo is failed #or "'version:' not in versioninfo.content"
+      loop: "{{lookup('ansible.builtin.dict',app)}}"    
+
+    - ansible.builtin.debug:
+        msg: "{{versioninfo.results}}"
+
+    - debug: 
+        msg: "{{ item.content }}"
+      loop: "{{versioninfo.results}}"
+
+
+#    - ansible.builtin.shell: "./shell.sh {{versioninfo.content}} {{item}}"
+#      args:
+#        chdir: /root/containers/jinja2_demo 
+#      delegate_to: localhost
+#      loop: "{{lookup('ansible.builtin.dict',app)}}"
+
+
+ #   - debug:
+ #        msg: "{{versioninfo.content|map(attribute='name','')|list}}""
+
+

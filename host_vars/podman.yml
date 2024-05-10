@@ -1,0 +1,21 @@
+app:
+  aap1:
+    name: app1
+    version: v1
+    port: 8081
+    host: podman
+  aap3:  
+    name: app3
+    version: v1
+    port: 8083
+    host: podman
+  app5:
+    name: app5
+    version: v2
+    port: 8085
+    host: podman
+  aap7:
+    name: app7  
+    version: v2
+    port: 8087
+    host: podman
