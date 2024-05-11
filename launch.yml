@@ -1,7 +1,8 @@
 - name: Container testing
   hosts: all
   become: true
-  gather_facts: false
+  gather_facts: true
+  serial: 1
   tasks:
     - name: Create a /data  directory if it does not exist
       ansible.builtin.file:

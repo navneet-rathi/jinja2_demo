@@ -1,1 +1,2 @@
-{% for ver in versioninfo.results|list %}{{ ver['item']['value']['host']}},{{ ver['item']['key']}},{{ ver['content']| split(':') | last }}{% endfor %}
+{% for ver in versioninfo.results|list %}{{ ver['item']['value']['host']}},{{ ver['item']['key']}},{{ ver['content']| split('release_date') | first|split (' ')| last|trim }},{{ ver['content']| split('release_date:') | last|trim|regex_replace('Z')|regex_replace('T',' ')}},{{ ver['item']['value']['port']}}
+{% endfor %}

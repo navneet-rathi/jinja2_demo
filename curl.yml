@@ -24,7 +24,7 @@
   #      msg: "{{ item }}"
   #    loop: "{{ versioninfo.results|map(attribute='content')|list}}"
 
-    - name: create a dir in tmp
+    - name: create an app dir in /tmp on ceontroller
       ansible.builtin.file:
         path: /tmp/app
         owner: root
@@ -33,7 +33,7 @@
         state: directory
       delegate_to: localhost
 
-    - name: render template
+    - name: Genrate a CSV file
       ansible.builtin.template:
         src: display.j2
         dest: /tmp/app/version_info-{{inventory_hostname}}.csv
@@ -43,16 +43,16 @@
 #        msg: "{{ item['item']['key'] }}"
 #      loop: "{{ versioninfo.results|list}}"
 #
-    - name: Assemble from fragments from a directory
+    - name: Assemble from fragments of CSVs from a directory
       ansible.builtin.assemble:
         src: /tmp/app
         dest: /tmp/mysql_app.txt
       delegate_to: localhost
 
-    - name: Read users from CSV file and return a list
+    - name: Read all data from CSV file and return a list
       community.general.read_csv:
         path: /tmp/mysql_app.txt
-        fieldnames: host,application,version
+        fieldnames: host,application,version,date,port
         delimiter: ','
       register: appdata
       delegate_to: localhost
@@ -83,7 +83,7 @@
          login_user: "{{ db_user }}"
          login_password: "{{ db_password }}"
          query:
-           - INSERT INTO appversion (host, application,Unique_instance ,version, Date) VALUES ("{{item.host}}","{{item.application}}","{{item.host}}-{{item.application}}","{{item.version}}" ,now())
+           - INSERT INTO appversion (host, application,Unique_instance ,version, Date, Port) VALUES ("{{item.host}}","app","{{item.host}}-{{item.application}}-{{item.port}}","{{item.version}}","{{item.date}}","{{item.port}}")
       loop: "{{ appdata.list }}"
       ignore_errors: true
       register: querystatus
