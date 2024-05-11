@@ -15,14 +15,22 @@
         state: directory
         mode: '0755'
       loop: "{{lookup('ansible.builtin.dict',app)}}" 
-      #when: "{{ inventory_hostname }} == {{ item.value.host }}"
 
     - name: Genrate the sample version file
       ansible.builtin.template:
         src: version.j2
         dest: "/data/{{ item.value.name }}/version.html"
       loop: "{{lookup('ansible.builtin.dict',app)}}"
-      #when: "{{ inventory_hostname }}  == {{ item.value.host }}"
+     
+    - name: Include selinux role
+      vars:
+        selinux_fcontexts:
+          - {target: '/data/{{ item.value.name }}(/.*)?', setype: 'httpd_sys_content_t', state: 'present'}
+    #    selinux_restore_dirs:
+    #      - "/data/{{ item.value.name}}"  
+      ansible.builtin.include_role:
+        name: fedora.linux_system_roles.selinux
+      loop: "{{lookup('ansible.builtin.dict',app)}}"  
 
     - name: launch a container
       containers.podman.podman_container:
@@ -32,17 +40,42 @@
         ports:
           - "{{item.value.port}}:80"
         volumes:
-          - "/data/{{ item.value.name }}:/usr/share/nginx/html"
+          - "/data/{{ item.value.name }}:/usr/share/nginx/html:Z"
         recreate: true
       loop: "{{lookup('ansible.builtin.dict',app)}}"  
 
-    - name: Gather facts for all containers
-      containers.podman.podman_container_info:
-      register: info
+
+    - name: Create HTML report
+      ansible.builtin.template:
+        src: report.j2
+        dest: "/data/{{ item.value.name }}/index.html"
+        mode: "644"
+      loop: "{{lookup('ansible.builtin.dict',app)}}"  
+
+    - name: Copy CSS over
+      ansible.builtin.copy:
+        src: "css"
+        dest: "/data/{{ item.value.name }}"
+        directory_mode: true
+        mode: "775"
+      loop: "{{lookup('ansible.builtin.dict',app)}}"
+
+    - name: Copy CSS over
+      ansible.builtin.copy:
+        src: "{{ item[1] }}"
+        dest: "/data/{{ item[0].value.name }}"
+        directory_mode: true
+        mode: "644"
+      loop: "{{ lookup('ansible.builtin.dict',app) | product(['webpage_logo.png','redhat-ansible-logo.svg']) | list}}" 
+
+##### This was written for Testing #####
+  #  - name: Gather facts for all containers
+  #    containers.podman.podman_container_info:
+  #    register: info
     
-    - debug:
-        msg: "{{item.Name}}"
-      loop: "{{info.containers}}" 
+  #  - debug:
+  #      msg: "{{item.Name}}"
+  #    loop: "{{info.containers}}" 
 
 
 #    - debug:
