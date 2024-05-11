@@ -3,26 +3,26 @@
   become: true
   gather_facts: false
   tasks:
-    - name: Create a directory if it does not exist
+    - name: Create a /data  directory if it does not exist
       ansible.builtin.file:
         path: /data
         state: directory
         mode: '0755'        
 
-    - name: Create a directory for an applications
+    - name: Create an application directory for an applications
       ansible.builtin.file:
         path: "/data/{{ item.value.name }}"
         state: directory
         mode: '0755'
       loop: "{{lookup('ansible.builtin.dict',app)}}" 
 
-    - name: Genrate the sample version file
+    - name: Genrate the version file to track versions
       ansible.builtin.template:
         src: version.j2
         dest: "/data/{{ item.value.name }}/version.html"
       loop: "{{lookup('ansible.builtin.dict',app)}}"
      
-    - name: Include selinux role
+    - name: Include selinux role for context setting
       vars:
         selinux_fcontexts:
           - {target: '/data/{{ item.value.name }}(/.*)?', setype: 'httpd_sys_content_t', state: 'present'}
@@ -30,7 +30,7 @@
         name: fedora.linux_system_roles.selinux
       loop: "{{lookup('ansible.builtin.dict',app)}}"  
 
-    - name: launch a container
+    - name: launch a containers of nginx on different hosts 
       containers.podman.podman_container:
         name: "nginx_container_{{ item.value.name }}"
         image: docker.io/nginx:stable-alpine3.17-slim
@@ -43,14 +43,14 @@
       loop: "{{lookup('ansible.builtin.dict',app)}}"  
 
 
-    - name: Create HTML report
+    - name: Create HTML index page so it feel good
       ansible.builtin.template:
         src: report.j2
         dest: "/data/{{ item.value.name }}/index.html"
         mode: "644"
       loop: "{{lookup('ansible.builtin.dict',app)}}"  
 
-    - name: Copy CSS over
+    - name: Copy CSS over to "{{inventory_hostname}}"
       ansible.builtin.copy:
         src: "css"
         dest: "/data/{{ item.value.name }}"
@@ -58,7 +58,7 @@
         mode: "775"
       loop: "{{lookup('ansible.builtin.dict',app)}}"
 
-    - name: Copy CSS over
+    - name: Copy images required by the index page
       ansible.builtin.copy:
         src: "{{ item[1] }}"
         dest: "/data/{{ item[0].value.name }}"
