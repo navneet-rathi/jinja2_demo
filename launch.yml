@@ -26,8 +26,6 @@
       vars:
         selinux_fcontexts:
           - {target: '/data/{{ item.value.name }}(/.*)?', setype: 'httpd_sys_content_t', state: 'present'}
-    #    selinux_restore_dirs:
-    #      - "/data/{{ item.value.name}}"  
       ansible.builtin.include_role:
         name: fedora.linux_system_roles.selinux
       loop: "{{lookup('ansible.builtin.dict',app)}}"  
@@ -67,6 +65,19 @@
         directory_mode: true
         mode: "644"
       loop: "{{ lookup('ansible.builtin.dict',app) | product(['webpage_logo.png','redhat-ansible-logo.svg']) | list}}" 
+
+    - name: Make sure firewall is up and running 
+      ansible.builtin.service:
+        name: firewalld
+        state: started
+        enabled: yes
+
+    - name: Allow traffic so our application can take traffic
+      ansible.posix.firewalld:
+        port: "{{ item.value.port }}/tcp"
+        permanent: true
+        state: enabled
+      loop: "{{lookup('ansible.builtin.dict',app)}}" 
 
 ##### This was written for Testing #####
   #  - name: Gather facts for all containers

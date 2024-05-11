@@ -15,14 +15,14 @@
     #- ansible.builtin.debug:
     #    msg: "{{versioninfo.results}}"
 
-    - debug: 
-        msg: "{{ item }}" 
-      loop: "{{ versioninfo.results|map(attribute='url')|list}}"
+  #  - debug: 
+  #      msg: "{{ item }}" 
+  #    loop: "{{ versioninfo.results|map(attribute='url')|list}}"
 
 
-    - debug: 
-        msg: "{{ item }}"
-      loop: "{{ versioninfo.results|map(attribute='content')|list}}"
+  #  - debug: 
+  #      msg: "{{ item }}"
+  #    loop: "{{ versioninfo.results|map(attribute='content')|list}}"
 
     - name: create a dir in tmp
       ansible.builtin.file:
@@ -47,6 +47,7 @@
       ansible.builtin.assemble:
         src: /tmp/app
         dest: /tmp/mysql_app.txt
+      delegate_to: localhost
 
     - name: Read users from CSV file and return a list
       community.general.read_csv:
@@ -54,12 +55,18 @@
         fieldnames: host,application,version
         delimiter: ','
       register: appdata
-      
-    - set_fact:
-        db_database: app_version_tracker
-        db_host: 
+      delegate_to: localhost
 
-    - name: Removing older data of versions from DB {{ db_sbc_database }} 
+    - set_fact:
+        db_database: version_data
+        db_host: 192.168.1.18
+        db_user: root
+        db_password: root
+
+    - debug:
+        msg: "{{ appdata }}"
+ 
+    - name: Removing older data of versions from DB {{ db_database }} 
       community.mysql.mysql_query:
          login_host: "{{ db_host }}"
          login_db: "{{ db_database }}"
@@ -67,15 +74,17 @@
          login_password: "{{ db_password }}"
          query:
            - TRUNCATE TABLE appversion; 
+      delegate_to: localhost
 
-    - name: Run several insert queries against db {{ db_sbc_database }} 
+    - name: Loading new data by Running several insert queries against db {{ db_database }} 
       community.mysql.mysql_query:
-         login_host: "{{ db_sbc_host }}"
-         login_db: "{{ db_sbc_database }}"
-         login_user: "{{ db_sbc_user }}"
-         login_password: "{{ db_sbc_password }}"
+         login_host: "{{ db_host }}"
+         login_db: "{{ db_database }}"
+         login_user: "{{ db_user }}"
+         login_password: "{{ db_password }}"
          query:
-           - INSERT INTO appversion (host, application,Unique_instance ,version, Date) VALUES ("{{item.host}}","{{item.application}}","{{item.version}}","{{item.host}}-{{item.instance}}",now())
-      loop: "{{ ccmsdata.list }}"
+           - INSERT INTO appversion (host, application,Unique_instance ,version, Date) VALUES ("{{item.host}}","{{item.application}}","{{item.host}}-{{item.application}}","{{item.version}}" ,now())
+      loop: "{{ appdata.list }}"
       ignore_errors: true
-      register: querystatus     
+      register: querystatus
+      delegate_to: localhost

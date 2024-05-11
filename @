@@ -1,3 +1,0 @@
-<html>
-{{hostvars[inventory_hostname]['app']|selectattr('name', 'equalto', "{{ item }}" ) }}
-</html>
