@@ -100,6 +100,9 @@
         return_content: yes
       register: dashboard_response
 
+    - debug:
+        msg: "{{ dashboard_response }}"
+
     - name: Save Dashboard JSON
       copy:
         content: "{{ dashboard_response.json }}"
