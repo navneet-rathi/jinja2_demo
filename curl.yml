@@ -105,10 +105,10 @@
 
     - name: Save Dashboard JSON
       copy:
-        content: "{{ dashboard_response.json }}"
-        dest: "/tmp/dashboard.json"
+        content: "{{ dashboard_response.content }}"
+        dest: "/tmp/dashboard.html"
 
     - name: Convert JSON to PDF
-      command: "wkhtmltopdf --page-width 1920 --page-height 1080 /tmp/dashboard.json /tmp/dashboard.pdf"
+      command: "wkhtmltopdf --page-width 1920 --page-height 1080 /tmp/dashboard.html /tmp/dashboard.pdf"
 
       
