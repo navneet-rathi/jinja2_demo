@@ -12,18 +12,6 @@
       failed_when: versioninfo is failed #or "'version:' not in versioninfo.content"
       loop: "{{lookup('ansible.builtin.dict',app)}}"    
 
-    #- ansible.builtin.debug:
-    #    msg: "{{versioninfo.results}}"
-
-  #  - debug: 
-  #      msg: "{{ item }}" 
-  #    loop: "{{ versioninfo.results|map(attribute='url')|list}}"
-
-
-  #  - debug: 
-  #      msg: "{{ item }}"
-  #    loop: "{{ versioninfo.results|map(attribute='content')|list}}"
-
     - name: create an app dir in /tmp on ceontroller
       ansible.builtin.file:
         path: /tmp/app
