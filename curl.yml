@@ -94,9 +94,9 @@
   tasks:
     - name: Get Grafana Dashboard
       uri:
-        url: "http://192.168.1.18:3000/api/dashboards/db/1"
+        url: "http://192.168.1.18:3000/api/dashboards/uid/fdlcrnfeocdmod"
         headers:
-          Authorization: "Bearer glsa_afb8rMLLCKvVhKqf0KxNRgOt075I46ff_41705f18"
+          Authorization: "Bearer glsa_3P9Kazzvf2EWe0XCMqBXR2zpYganTGxs_e8147d75"
         return_content: yes
       register: dashboard_response
 
