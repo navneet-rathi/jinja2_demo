@@ -96,7 +96,7 @@
       uri:
         url: "http://192.168.1.18:3000/api/dashboards/db/1"
         headers:
-          Authorization: "glsa_afb8rMLLCKvVhKqf0KxNRgOt075I46ff_41705f18"
+          Authorization: "Bearer glsa_afb8rMLLCKvVhKqf0KxNRgOt075I46ff_41705f18"
         return_content: yes
       register: dashboard_response
 
