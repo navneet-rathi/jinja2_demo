@@ -88,6 +88,3 @@
       ignore_errors: true
       register: querystatus
       delegate_to: localhost
-
-
-      
