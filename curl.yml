@@ -88,3 +88,26 @@
       ignore_errors: true
       register: querystatus
       delegate_to: localhost
+
+---
+- hosts: 192.168.1.14
+  gather_facts: no
+  tasks:
+    - name: Get Grafana Dashboard
+      uri:
+        url: "http://192.168.1.18/api/dashboards/db/1"
+        headers:
+          Authorization: "glsa_afb8rMLLCKvVhKqf0KxNRgOt075I46ff_41705f18"
+        return_content: yes
+      register: dashboard_response
+
+    - name: Save Dashboard JSON
+      copy:
+        content: "{{ dashboard_response.json }}"
+        dest: "/tmp/dashboard.json"
+
+    - name: Convert JSON to PDF
+      command: "wkhtmltopdf --page-width 1920 --page-height 1080 /tmp/dashboard.json /tmp/dashboard.pdf"
+
+
+      
