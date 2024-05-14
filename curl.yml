@@ -89,8 +89,6 @@
       register: querystatus
       delegate_to: localhost
 
-
----
 - hosts: 192.168.1.14
   gather_facts: no
   tasks:
