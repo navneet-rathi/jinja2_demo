@@ -88,27 +88,25 @@
       ignore_errors: true
       register: querystatus
       delegate_to: localhost
+      
+    - name: Genrate Email content
+      ansible.builtin.template:
+        src: alert_email_html.j2
+        dest: /tmp/alert_email.html
+      run_once: true  
+      delegate_to: localhost
 
-- hosts: 192.168.1.14
-  gather_facts: no
-  tasks:
-    - name: Get Grafana Dashboard
-      uri:
-        url: "http://192.168.1.18:3000/d/fdlcrnfeocdmod/version-control-application"
-        headers:
-          Authorization: "Bearer glsa_3P9Kazzvf2EWe0XCMqBXR2zpYganTGxs_e8147d75"
-        return_content: yes
-      register: dashboard_response
-
-    - debug:
-        msg: "{{ dashboard_response }}"
-
-    - name: Save Dashboard JSON
-      copy:
-        content: "{{ dashboard_response.content }}"
-        dest: "/tmp/dashboard.html"
-
-    - name: Convert JSON to PDF
-      command: "wkhtmltopdf --page-width 1920 --page-height 1080 /tmp/dashboard.html /tmp/dashboard.pdf"
-
+    - name: Send email Alert
+      mail:
+        host: smtp.gmail.com
+        port: 587
+        subtype: html
+        to:
+        - "nrathi@redhat.com"
+        subject: "Alert: Password Changed as per the org policy"
+        body: "{{ lookup('file', '/tmp/alert_email.html') }}"
+        username: dmeonavneet@gmail.com
+        password: "rbfqhoincpyouxqk"
+      run_once: true  
+      delegate_to: localhost 
       
