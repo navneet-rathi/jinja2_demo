@@ -89,24 +89,4 @@
       register: querystatus
       delegate_to: localhost
       
-    - name: Genrate Email content
-      ansible.builtin.template:
-        src: alert_email_html.j2
-        dest: /tmp/alert_email.html
-      run_once: true  
-      delegate_to: localhost
-
-    - name: Send email Alert
-      mail:
-        host: smtp.gmail.com
-        port: 587
-        subtype: html
-        to:
-        - "nrathi@redhat.com"
-        subject: "Alert: Password Changed as per the org policy"
-        body: "{{ lookup('file', '/tmp/alert_email.html') }}"
-        username: dmeonavneet@gmail.com
-        password: "rbfqhoincpyouxqk"
-      run_once: true  
-      delegate_to: localhost 
       
