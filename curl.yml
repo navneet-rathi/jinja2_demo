@@ -56,6 +56,10 @@
         delimiter: ','
       register: appdata
       delegate_to: localhost
+      
+    - name: Print the genrated csv so we can use
+      shell: "cat /tmp/mysql_app.txt"
+      delegate_to: localhost
 
     - set_fact:
         db_database: version_data
