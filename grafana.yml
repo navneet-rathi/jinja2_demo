@@ -15,7 +15,7 @@
         login_user: "{{ db_user }}"
         login_password: "{{ db_password }}"
         query:
-          - select aplication from version_data.appversion;         
+          - select application from version_data.appversion;         
         single_transaction: yes
       register: app_db_query     
 
