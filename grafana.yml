@@ -22,8 +22,7 @@
     - debug:
         var: app_db_query
 
-#    - name: build json 
-#      ansible.builtin.template:
-#        src: dash.json.j2
-#        dest: /tmp/dash.json
-#      delegate_to: localhost    
+    - name: build json 
+      ansible.builtin.template:
+        src: dash.json.j2
+        dest: /tmp/dash.json
