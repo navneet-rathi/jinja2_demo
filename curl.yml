@@ -36,16 +36,12 @@
         dest: /tmp/app/version_info-{{inventory_hostname}}.csv
       delegate_to: localhost
 
-   - name: callect a Time_series data in csv from {{inventory_hostname}}
+    - name: callect a Time_series data in csv from {{inventory_hostname}}
       ansible.builtin.template:
         src: time_series.csv.j2
         dest: /tmp/app/time/time-{{inventory_hostname}}.csv
       delegate_to: localhost      
 
-#    - debug: 
-#        msg: "{{ item['item']['key'] }}"
-#      loop: "{{ versioninfo.results|list}}"
-#
     - name: Assemble from fragments of CSVs from a directory
       ansible.builtin.assemble:
         src: /tmp/app
