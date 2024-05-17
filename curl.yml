@@ -21,11 +21,26 @@
         state: directory
       delegate_to: localhost
 
+    - name: create an app/time dir in /tmp on ceontroller
+      ansible.builtin.file:
+        path: /tmp/app/time
+        owner: root
+        group: root
+        mode: '0755'
+        state: directory
+      delegate_to: localhost      
+
     - name: Genrate a CSV file
       ansible.builtin.template:
         src: display.j2
         dest: /tmp/app/version_info-{{inventory_hostname}}.csv
       delegate_to: localhost
+
+   - name: callect a Time_series data in csv from {{inventory_hostname}}
+      ansible.builtin.template:
+        src: time_series.csv.j2
+        dest: /tmp/app/time/time-{{inventory_hostname}}.csv
+      delegate_to: localhost      
 
 #    - debug: 
 #        msg: "{{ item['item']['key'] }}"
@@ -34,16 +49,31 @@
     - name: Assemble from fragments of CSVs from a directory
       ansible.builtin.assemble:
         src: /tmp/app
-        dest: /tmp/mysql_app.txt
+        dest: /tmp/mysql_app.csv
       delegate_to: localhost
+
+    - name: Assemble from fragments of CSVs from a directory
+      ansible.builtin.assemble:
+        src: /tmp/app/time
+        dest: /tmp/mysql_time.csv
+      delegate_to: localhost      
 
     - name: Read all data from CSV file and return a list
       community.general.read_csv:
-        path: /tmp/mysql_app.txt
+        path: /tmp/mysql_app.csv
         fieldnames: host,application,version,date,port
         delimiter: ','
       register: appdata
       delegate_to: localhost
+
+    - name: Read all data from CSV file and return a list
+      community.general.read_csv:
+        path: /tmp/mysql_time.csv
+        fieldnames: app,version
+        delimiter: ','
+      register: timedata
+      delegate_to: localhost
+
 
     - set_fact:
         db_database: version_data
@@ -52,7 +82,7 @@
         db_password: root
 
     - debug:
-        msg: "{{ appdata }}"
+        msg: "{{ appdata }} and {{timedata}}"
  
     - name: Removing older data of versions from DB {{ db_database }} 
       community.mysql.mysql_query:
@@ -76,3 +106,16 @@
       ignore_errors: true
       register: querystatus
       delegate_to: localhost
+
+    - name: Loading timeseries data by Running several insert queries against db {{ db_database }} 
+      community.mysql.mysql_query:
+         login_host: "{{ db_host }}"
+         login_db: "{{ db_database }}"
+         login_user: "{{ db_user }}"
+         login_password: "{{ db_password }}"
+         query:
+           - INSERT INTO appversion (app, version, date) VALUES ("{{item.app}}","{{item.version}}",now())
+      loop: "{{ timedata.list }}"
+      ignore_errors: true
+      register: querystatus_time
+      delegate_to: localhost      
