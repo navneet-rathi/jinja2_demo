@@ -1,7 +1,7 @@
 ---
 - name: reder a grafana grafana_dashboard
   hosts: localhost
-  ansible_connection: local    
+  connection: local    
   tasks:
     - set_fact:
         db_database: version_data
