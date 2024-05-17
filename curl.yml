@@ -114,4 +114,5 @@
       loop: "{{ timedata.list }}"
       ignore_errors: true
       register: querystatus_time
-      delegate_to: localhost      
+      delegate_to: localhost
+      run_once: true      
