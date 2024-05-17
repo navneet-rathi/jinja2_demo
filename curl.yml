@@ -102,6 +102,7 @@
       ignore_errors: true
       register: querystatus
       delegate_to: localhost
+      run_once: true
 
     - name: Loading timeseries data by Running several insert queries against db {{ db_database }} 
       community.mysql.mysql_query:
