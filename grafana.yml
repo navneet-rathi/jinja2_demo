@@ -1,9 +1,28 @@
 ---
 - name: reder a grafana grafana_dashboard
-  hosts: localhost
+  hosts: localhost    
   tasks:
-    - name: build json 
-      ansible.builtin.template:
-        src: dash.json.j2
-        dest: /tmp/dash.json
-      delegate_to: localhost    
+    - set_fact:
+        db_database: version_data
+        db_host: 192.168.1.18
+        db_user: root
+        db_password: root
+    - name: run a select query to get the list of panel we want to papulate
+      community.mysql.mysql_query:
+        login_host: "{{ db_host }}"
+        login_db: "{{ db_database }}"
+        login_user: "{{ db_user }}"
+        login_password: "{{ db_password }}"
+        query:
+          - select aplication from version_data.appversion;         
+        single_transaction: yes
+      register: app_db_query     
+
+    - debug:
+        var: app_db_query
+
+#    - name: build json 
+#      ansible.builtin.template:
+#        src: dash.json.j2
+#        dest: /tmp/dash.json
+#      delegate_to: localhost    
