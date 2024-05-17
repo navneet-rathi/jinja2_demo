@@ -1,5 +1,5 @@
 - name: Container testing
-  hosts: all
+  hosts: containers
   become: true
   gather_facts: true
   serial: 1
