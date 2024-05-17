@@ -134,7 +134,7 @@
           },
           "editorMode": "builder",
           "format": "table",
-          "rawSql": "SELECT * FROM version_data.time_series WHERE app LIKE '%{{item.application}}' LIMIT 50 ",
+          "rawSql": "SELECT * FROM version_data.time_series WHERE app LIKE '%{{item}}' LIMIT 50 ",
           "refId": "A",
           "sql": {
             "columns": [
@@ -159,7 +159,7 @@
                     "fieldSrc": "field",
                     "operator": "ends_with",
                     "value": [
-                      "{{item.application}}"
+                      "{{item}}"
                     ],
                     "valueSrc": [
                       "value"
@@ -174,12 +174,12 @@
               
               "type": "group"
             },
-            "whereString": "app LIKE '%{{item.application}}'"
+            "whereString": "app LIKE '%{{item}}'"
           },
           "table": "time_series"
         }
       ],
-      "title": "{{item.application}}",
+      "title": "{{item}}",
       "type": "timeseries"
     },
     {%endfor%}
