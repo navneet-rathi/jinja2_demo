@@ -1,0 +1,9 @@
+---
+- name: reder a grafana grafana_dashboard
+  hosts: localhost
+  tasks:
+    - name: build json 
+      ansible.builtin.template:
+        src: dash.json.j2
+        dest: /tmp/dash.json
+      delegate_to: localhost    

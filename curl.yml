@@ -97,7 +97,7 @@
          login_user: "{{ db_user }}"
          login_password: "{{ db_password }}"
          query:
-           - INSERT INTO appversion (host, application,Unique_instance ,version, Date, Port) VALUES ("{{item.host}}","app","{{item.host}}-{{item.application}}-{{item.port}}","{{item.version}}","{{item.date}}","{{item.port}}")
+           - INSERT INTO appversion (host, application,Unique_instance ,version, Date, Port) VALUES ("{{item.host}}","{{item.application}}","{{item.host}}-{{item.application}}-{{item.port}}","{{item.version}}","{{item.date}}","{{item.port}}")
       loop: "{{ appdata.list }}"
       ignore_errors: true
       register: querystatus
