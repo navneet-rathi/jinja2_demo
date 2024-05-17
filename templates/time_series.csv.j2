@@ -1,2 +1,2 @@
-{% for ver in versioninfo.results|list %}{{ ver['item']['key']split ('v')| last|trim }},{{ ver['content']| split('release_date') | first|split (' ')| last|trim }}
+{% for ver in versioninfo.results|list %}{{ ver['item']['key'] }},{{ ver['content']| split('release_date') | first|split (' ')| last|split ('v')| lasttrim }}
 {% endfor %}
