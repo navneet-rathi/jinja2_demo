@@ -26,3 +26,14 @@
       ansible.builtin.template:
         src: dash.json.j2
         dest: /tmp/dash.json
+
+    - name: Import Grafana dashboard New_DashBoard
+      community.grafana.grafana_dashboard:
+        grafana_url: http://192.168.1.18:3000
+        grafana_api_key: "glsa_AY4IpLmfbzMv5g55AXSumWQz2i4eMVII_a3170c05"
+        state: present
+        commit_message: Updated by ansible
+        overwrite: true
+        path: /tmp/dash.json
+
+        
