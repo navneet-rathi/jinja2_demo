@@ -21,7 +21,7 @@
   "id": 4,
   "links": [],
   "panels": [
-   {% for item in app_db_query.query_result%}
+   {% for item in app_db_query.query_result[0]%}
     {
       "datasource": {
         "type": "mysql",
@@ -134,7 +134,7 @@
           },
           "editorMode": "builder",
           "format": "table",
-          "rawSql": "SELECT * FROM version_data.time_series WHERE app LIKE '%{{item}}' LIMIT 50 ",
+          "rawSql": "SELECT * FROM version_data.time_series WHERE app LIKE '%{{item.application}}' LIMIT 50 ",
           "refId": "A",
           "sql": {
             "columns": [
@@ -159,7 +159,7 @@
                     "fieldSrc": "field",
                     "operator": "ends_with",
                     "value": [
-                      "{{item}}"
+                      "{{item.application}}"
                     ],
                     "valueSrc": [
                       "value"
@@ -174,12 +174,12 @@
               
               "type": "group"
             },
-            "whereString": "app LIKE '%{{item}}'"
+            "whereString": "app LIKE '%{{item.application}}'"
           },
           "table": "time_series"
         }
       ],
-      "title": "{{item}}",
+      "title": "{{item.application}}",
       "type": "timeseries"
     },
     {%endfor%}
