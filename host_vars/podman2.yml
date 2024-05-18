@@ -19,3 +19,8 @@ app:
     version: v3_beta
     port: 8088
     host: podman2
+  app10:
+    name: app10 
+    version: v4
+    port: 8080
+    host: podman2    

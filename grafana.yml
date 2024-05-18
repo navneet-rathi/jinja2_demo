@@ -8,6 +8,7 @@
         db_host: 192.168.1.18
         db_user: root
         db_password: root
+        
     - name: run a select query to get the list of panel we want to papulate
       community.mysql.mysql_query:
         login_host: "{{ db_host }}"
@@ -19,15 +20,15 @@
         single_transaction: yes
       register: app_db_query     
 
-    - debug:
-        var: app_db_query
+#    - debug:
+#        var: app_db_query
 
-    - name: build json 
+    - name: Render Grafana json for grafana Dashboard. 
       ansible.builtin.template:
         src: dash.json.j2
         dest: /tmp/dash.json
 
-    - name: Import Grafana dashboard New_DashBoard
+    - name: Import Grafana dashboard New_DashBoard with newly build json
       community.grafana.grafana_dashboard:
         grafana_url: http://192.168.1.18:3000
         grafana_api_key: "glsa_AY4IpLmfbzMv5g55AXSumWQz2i4eMVII_a3170c05"
