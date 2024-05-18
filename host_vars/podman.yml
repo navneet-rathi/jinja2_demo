@@ -19,6 +19,11 @@ app:
     version: v2
     port: 8087
     host: podman
+  app9:
+    name: app9
+    version: v5
+    port: 8089
+    host: podman    
   app11:
     name: app11
     version: v5
