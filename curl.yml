@@ -81,7 +81,6 @@
     - debug:
         msg: "{{ appdata }} and {{timedata}}"
  
-
     - name: Loading new data by Running several insert queries against db "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_database') }}" 
       community.mysql.mysql_query:
         login_host: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_host') }}"
@@ -90,6 +89,18 @@
         login_password: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_password') }}"
         query:
           - TRUNCATE TABLE appversion; 
+      ignore_errors: true
+      register: querystatus
+      delegate_to: localhost
+      run_once: true
+
+    - name: Loading new data by Running several insert queries against db "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_database') }}" 
+      community.mysql.mysql_query:
+        login_host: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_host') }}"
+        login_db: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_database') }}"
+        login_user: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_user') }}"
+        login_password: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_password') }}"
+        query:
           - INSERT INTO appversion (host, application,Unique_instance ,version, Date, Port) VALUES ("{{item.host}}","{{item.application}}","{{item.host}}-{{item.application}}-{{item.port}}","{{item.version}}","{{item.date}}","{{item.port}}")
       loop: "{{ appdata.list }}"
       ignore_errors: true
