@@ -11,10 +11,10 @@
 
     - name: run a select query to get the list of panel we want to papulate
       community.mysql.mysql_query:
-        login_host: "{{ db_host }}"
-        login_db: "{{ db_database }}"
-        login_user: "{{ db_user }}"
-        login_password: "{{ db_password }}"
+        login_host: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_host') }}"
+        login_db: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_database') }}"
+        login_user: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_user') }}"
+        login_password: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:password') }}"
         query:
           - select application from version_data.appversion;         
         single_transaction: yes
@@ -30,8 +30,8 @@
 
     - name: Import Grafana dashboard New_DashBoard with newly build json
       community.grafana.grafana_dashboard:
-        grafana_url: "{{grafana_URL}}""
-        grafana_api_key: "{{grafana_key}}"
+        grafana_url: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:url') }}"
+        grafana_api_key: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:key') }}"
         state: present
         commit_message: Updated by ansible
         overwrite: true
