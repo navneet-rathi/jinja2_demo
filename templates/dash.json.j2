@@ -22,7 +22,7 @@
   "links": [],
   "panels": [
    {% for item in app_db_query.query_result[0]%}
-   {%if hosts_db_query.query_result[1]|count != loop.index %}
+   {%if app_db_query.query_result[0]|count != loop.index %}
     {
       "datasource": {
         "type": "mysql",
