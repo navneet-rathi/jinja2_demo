@@ -22,5 +22,10 @@ app:
   app10:
     name: app10 
     version: v4
-    port: 8080
-    host: podman2    
+    port: 8090
+    host: podman2
+  app12:
+    name: app12 
+    version: v4
+    port: 8092
+    host: podman2        
