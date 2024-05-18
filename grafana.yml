@@ -3,12 +3,12 @@
   hosts: localhost
   connection: local    
   tasks:
-    - set_fact:
-        db_database: version_data
-        db_host: 192.168.1.18
-        db_user: root
-        db_password: root
-        
+  #  - set_fact:
+  #      db_database: 
+  #      db_host: 
+  #      db_user: 
+  #      db_password: 
+
     - name: run a select query to get the list of panel we want to papulate
       community.mysql.mysql_query:
         login_host: "{{ db_host }}"
@@ -30,8 +30,8 @@
 
     - name: Import Grafana dashboard New_DashBoard with newly build json
       community.grafana.grafana_dashboard:
-        grafana_url: http://192.168.1.18:3000
-        grafana_api_key: "glsa_AY4IpLmfbzMv5g55AXSumWQz2i4eMVII_a3170c05"
+        grafana_url: "{{grafana_URL}}""
+        grafana_api_key: "{{grafana_key}}"
         state: present
         commit_message: Updated by ansible
         overwrite: true
