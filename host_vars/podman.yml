@@ -1,12 +1,12 @@
 app:
   app1:
     name: app1
-    version: v2
+    version: v1
     port: 8081
     host: podman
   app3:  
     name: app3
-    version: v1
+    version: v2
     port: 8083
     host: podman
   app5:
