@@ -3,6 +3,8 @@
   hosts: containers
   gather_facts: false
   become: false
+  vars:
+    data_retain: 2
   tasks:
     - name: Get the version of avalable application
       ansible.builtin.uri:
@@ -83,7 +85,8 @@
         login_user: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_user') }}"
         login_password: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_password') }}"
         query:
-          - TRUNCATE TABLE appversion; 
+          - TRUNCATE TABLE appversion;
+          - DELETE FROM time_series WHERE time_series.date <(now() - INTERVAL "{{ data_retain }}" day) ORDER BY app ASC; 
       ignore_errors: true
       register: querystatus
       delegate_to: localhost
