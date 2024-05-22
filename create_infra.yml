@@ -1,8 +1,7 @@
 ---
 - name: create required infra
-  hosts: aap2
-  become: true
-  gather_facts: true
+  hosts: aap2.example.com
+  become: true  gather_facts: true
   tasks:
     - name: Restart a container
       containers.podman.podman_container:
