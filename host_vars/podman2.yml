@@ -16,7 +16,7 @@ app:
     host: podman2
   app8:
     name: app8  
-    version: v3_beta
+    version: v3.2
     port: 8088
     host: podman2
   app10:
