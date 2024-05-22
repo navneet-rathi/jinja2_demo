@@ -1,0 +1,15 @@
+---
+- name: create required infra
+  hosts: podman
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Restart a container
+      containers.podman.podman_container:
+        name: myapplication
+        image: redis
+        state: started
+        restart: true
+        
+
+        
