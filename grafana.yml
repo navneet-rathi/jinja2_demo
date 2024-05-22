@@ -11,7 +11,7 @@
         login_user: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_user') }}"
         login_password: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_password') }}"
         query:
-          - select application from version_data.appversion;         
+          - select application from version_data.appversion ORDER BY app ASC;         
         single_transaction: yes
       register: app_db_query     
 
