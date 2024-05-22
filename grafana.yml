@@ -3,11 +3,6 @@
   hosts: localhost
   connection: local    
   tasks:
-  #  - set_fact:
-  #      db_database: 
-  #      db_host: 
-  #      db_user: 
-  #      db_password: 
 
     - name: run a select query to get the list of panel we want to papulate
       community.mysql.mysql_query:
@@ -19,9 +14,6 @@
           - select application from version_data.appversion;         
         single_transaction: yes
       register: app_db_query     
-
-#    - debug:
-#        var: app_db_query
 
     - name: Render Grafana json for grafana Dashboard. 
       ansible.builtin.template:

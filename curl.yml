@@ -6,7 +6,7 @@
   tasks:
     - name: Get the version of avalable application
       ansible.builtin.uri:
-        url: "http://{{ item.value.host }}:{{item.value.port}}/version.html"
+        url: "http://{{ item['value']['host'] }}:{{item.value.port}}/version.html"
         return_content: true
       register: versioninfo
       delegate_to: localhost
@@ -71,12 +71,6 @@
       register: timedata
       delegate_to: localhost
 
-
-##    - set_fact:
-#        db_database: version_data
-#        db_host: 192.168.1.18
-#       db_user: root
-#        db_password: root
 
     - debug:
         msg: "{{ appdata }} and {{timedata}}"
