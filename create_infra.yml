@@ -1,15 +1,16 @@
 ---
 - name: create required infra
-  hosts: podman
+  hosts: aap2
   become: true
   gather_facts: true
   tasks:
     - name: Restart a container
       containers.podman.podman_container:
-        name: myapplication
-        image: redis
+        name: "{{ item['c'] }}"
         state: started
         restart: true
-        
-
-        
+        image: "{{ item['img'] }}"
+      loop:
+        - { c: 'version_data', img: 'docker.io/mysql:latest'}
+        - { c: 'phpmyadmin', img: 'docker.io/phpmyadmin:latest'}
+        - { c: 'grafana', img: 'docker.io/grafana/grafana:latest'}
