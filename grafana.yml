@@ -40,5 +40,5 @@
         state: present
         commit_message: Updated by ansible
         overwrite: true
-        path: version_control.json
+        path: files/version_control.json
         
