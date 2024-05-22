@@ -135,7 +135,7 @@
           },
           "editorMode": "builder",
           "format": "table",
-          "rawSql": "SELECT * FROM version_data.time_series WHERE app LIKE '%{{item.application}}'",
+          "rawSql": "SELECT * FROM version_data.time_series WHERE app LIKE '%{{item.application}}' ORDER BY date DESC ",
           "refId": "A",
           "sql": {
             "columns": [
@@ -296,7 +296,7 @@
           },
           "editorMode": "builder",
           "format": "table",
-          "rawSql": "SELECT * FROM version_data.time_series WHERE app LIKE '%{{item.application}}' ",
+          "rawSql": "SELECT * FROM version_data.time_series WHERE app LIKE '%{{item.application}}' ORDER BY date DESC ",
           "refId": "A",
           "sql": {
             "columns": [
