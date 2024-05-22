@@ -2,7 +2,7 @@
   hosts: containers
   become: true
   gather_facts: true
-  #serial: 1
+  serial: 1
   tasks:
     - name: Create a /data  directory if it does not exist
       ansible.builtin.file:
@@ -66,7 +66,7 @@
     - name: Copy images required by the index page
       ansible.builtin.copy:
         src: "{{ item[1] }}"
-        dest: "/data/{{ item[0].['value'].['name'] }}"
+        dest: "/data/{{ item[0]['value']['name'] }}"
         directory_mode: true
         mode: "644"
       loop: "{{ lookup('ansible.builtin.dict',app) | product(['webpage_logo.png','redhat-ansible-logo.svg']) | list}}" 
