@@ -32,4 +32,13 @@
         overwrite: true
         path: /tmp/dash.json
 
+
+    - name: Load Grafana from Json version_control
+      community.grafana.grafana_dashboard:
+        grafana_url: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:url') }}"
+        grafana_api_key: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:key') }}"
+        state: present
+        commit_message: Updated by ansible
+        overwrite: true
+        path: version_control.json
         
