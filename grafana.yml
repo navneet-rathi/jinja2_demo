@@ -19,6 +19,9 @@
       ansible.builtin.template:
         src: dash.json.j2
         dest: /tmp/dash.json
+        owner: root
+        group: root
+        mode: 0644
 
     - name: Import Grafana dashboard New_DashBoard with newly build json
       community.grafana.grafana_dashboard:

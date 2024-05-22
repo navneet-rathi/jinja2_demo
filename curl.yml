@@ -11,9 +11,9 @@
       register: versioninfo
       delegate_to: localhost
       failed_when: versioninfo is failed #or "'version:' not in versioninfo.content"
-      loop: "{{lookup('ansible.builtin.dict',app)}}"    
+      loop: "{{ lookup('ansible.builtin.dict',app) }}"    
 
-    - name: create an app dir in /tmp on ceontroller
+    - name: create an app dir in /tmp inside controller container
       ansible.builtin.file:
         path: /tmp/app
         owner: root
@@ -22,7 +22,7 @@
         state: directory
       delegate_to: localhost
 
-    - name: create an app/time dir in /tmp on ceontroller
+    - name: create an app/time dir in /tmp inside controller container
       ansible.builtin.file:
         path: /tmp/app/time
         owner: root
@@ -31,31 +31,31 @@
         state: directory
       delegate_to: localhost      
 
-    - name: Genrate a CSV file
+    - name: Genrate a CSV file which we want to load
       ansible.builtin.template:
         src: display.j2
         dest: /tmp/app/version_info-{{inventory_hostname}}.csv
       delegate_to: localhost
 
-    - name: callect a Time_series data in csv from {{inventory_hostname}}
+    - name: Collect a Time_series data in csv from {{inventory_hostname}}
       ansible.builtin.template:
         src: time_series.csv.j2
         dest: /tmp/app/time/time-{{inventory_hostname}}.csv
       delegate_to: localhost      
 
-    - name: Assemble from fragments of CSVs from a directory
+    - name: Assemble from fragments of CSVs from a directory in one
       ansible.builtin.assemble:
         src: /tmp/app
         dest: /tmp/mysql_app.csv
       delegate_to: localhost
 
-    - name: Assemble from fragments of CSVs from a directory
+    - name: Assemble from fragments of CSVs from a directory in one
       ansible.builtin.assemble:
         src: /tmp/app/time
         dest: /tmp/mysql_time.csv
       delegate_to: localhost      
 
-    - name: Read all data from CSV file and return a list
+    - name: Read all data from CSV file and return a list for mysql
       community.general.read_csv:
         path: /tmp/mysql_app.csv
         fieldnames: host,application,version,date,port
@@ -63,7 +63,7 @@
       register: appdata
       delegate_to: localhost
 
-    - name: Read all data from CSV file and return a list
+    - name: Read all data from CSV file and return a list for mysql time series
       community.general.read_csv:
         path: /tmp/mysql_time.csv
         fieldnames: app,version
@@ -72,10 +72,11 @@
       delegate_to: localhost
 
 
-    - debug:
+    - name: display all containts we want to load
+      ansible.builtin.debug:
         msg: "{{ appdata }} and {{timedata}}"
  
-    - name: Loading new data by Running several insert queries against db "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_database') }}" 
+    - name: Removing Exesting data "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_database') }}" 
       community.mysql.mysql_query:
         login_host: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_host') }}"
         login_db: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_database') }}"
