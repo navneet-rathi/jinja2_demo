@@ -83,4 +83,4 @@
         permanent: true
         state: enabled
         immediate: true
-      loop: "{{lookup('ansible.builtin.dict', app)}}" 
+      loop: "{{ lookup('ansible.builtin.dict', app) }}" 
