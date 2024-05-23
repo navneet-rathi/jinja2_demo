@@ -1,30 +1,21 @@
 ---
 - name: Get the version of softwares
-  hosts: all
+  hosts: containers
   gather_facts: false
+  become: false
+  vars:
+    data_retain: 2
   tasks:
     - name: Get the version of avalable application
       ansible.builtin.uri:
-        url: "http://{{ item.value.host }}:{{item.value.port}}/version.html"
+        url: "http://{{ item['value']['host'] }}:{{item['value']['port']}}/version.html"
         return_content: true
       register: versioninfo
       delegate_to: localhost
       failed_when: versioninfo is failed #or "'version:' not in versioninfo.content"
-      loop: "{{lookup('ansible.builtin.dict',app)}}"    
+      loop: "{{ lookup('ansible.builtin.dict',app) }}"    
 
-    #- ansible.builtin.debug:
-    #    msg: "{{versioninfo.results}}"
-
-  #  - debug: 
-  #      msg: "{{ item }}" 
-  #    loop: "{{ versioninfo.results|map(attribute='url')|list}}"
-
-
-  #  - debug: 
-  #      msg: "{{ item }}"
-  #    loop: "{{ versioninfo.results|map(attribute='content')|list}}"
-
-    - name: create a dir in tmp
+    - name: create an app dir in /tmp inside controller container
       ansible.builtin.file:
         path: /tmp/app
         owner: root
@@ -33,26 +24,43 @@
         state: directory
       delegate_to: localhost
 
-    - name: render template
+    - name: create an app/time dir in /tmp inside controller container
+      ansible.builtin.file:
+        path: /tmp/app/time
+        owner: root
+        group: root
+        mode: '0755'
+        state: directory
+      delegate_to: localhost      
+
+    - name: Genrate a CSV file which we want to load
       ansible.builtin.template:
         src: display.j2
         dest: /tmp/app/version_info-{{inventory_hostname}}.csv
       delegate_to: localhost
 
-#    - debug: 
-#        msg: "{{ item['item']['key'] }}"
-#      loop: "{{ versioninfo.results|list}}"
-#
-    - name: Assemble from fragments from a directory
+    - name: Collect a Time_series data in csv from {{inventory_hostname}}
+      ansible.builtin.template:
+        src: time_series.csv.j2
+        dest: /tmp/app/time/time-{{inventory_hostname}}.csv
+      delegate_to: localhost      
+
+    - name: Assemble from fragments of CSVs from a directory in one
       ansible.builtin.assemble:
         src: /tmp/app
-        dest: /tmp/mysql_app.txt
+        dest: /tmp/mysql_app.csv
       delegate_to: localhost
 
-    - name: Read users from CSV file and return a list
+    - name: Assemble from fragments of CSVs from a directory in one
+      ansible.builtin.assemble:
+        src: /tmp/app/time
+        dest: /tmp/mysql_time.csv
+      delegate_to: localhost      
+
+    - name: Read all data from CSV file and return a list for mysql
       community.general.read_csv:
-        path: /tmp/mysql_app.txt
-        fieldnames: host,application,version
+        path: /tmp/mysql_app.csv
+        fieldnames: host,application,version,date,port
         delimiter: ','
       register: appdata
       delegate_to: localhost
@@ -61,34 +69,57 @@
       shell: "cat /tmp/mysql_app.txt"
       delegate_to: localhost
 
-    - set_fact:
-        db_database: version_data
-        db_host: 192.168.1.18
-        db_user: root
-        db_password: root
-
-    - debug:
-        msg: "{{ appdata }}"
- 
-    - name: Removing older data of versions from DB {{ db_database }} 
-      community.mysql.mysql_query:
-         login_host: "{{ db_host }}"
-         login_db: "{{ db_database }}"
-         login_user: "{{ db_user }}"
-         login_password: "{{ db_password }}"
-         query:
-           - TRUNCATE TABLE appversion; 
+    - name: Read all data from CSV file and return a list for mysql time series
+      community.general.read_csv:
+        path: /tmp/mysql_time.csv
+        fieldnames: app,version
+        delimiter: ','
+      register: timedata
       delegate_to: localhost
 
-    - name: Loading new data by Running several insert queries against db {{ db_database }} 
+
+    - name: display all containts we want to load
+      ansible.builtin.debug:
+        msg: "{{ appdata }} and {{timedata}}"
+ 
+    - name: Removing Exesting data "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_database') }}" 
       community.mysql.mysql_query:
-         login_host: "{{ db_host }}"
-         login_db: "{{ db_database }}"
-         login_user: "{{ db_user }}"
-         login_password: "{{ db_password }}"
-         query:
-           - INSERT INTO appversion (host, application,Unique_instance ,version, Date) VALUES ("{{item.host}}","{{item.application}}","{{item.host}}-{{item.application}}","{{item.version}}" ,now())
+        login_host: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_host') }}"
+        login_db: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_database') }}"
+        login_user: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_user') }}"
+        login_password: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_password') }}"
+        query:
+          - TRUNCATE TABLE appversion;
+          - DELETE FROM time_series WHERE time_series.date <(now() - INTERVAL "{{ data_retain }}" day) ORDER BY app ASC; 
+      ignore_errors: true
+      register: querystatus
+      delegate_to: localhost
+      run_once: true
+
+    - name: Loading new data by Running several insert queries against db "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_database') }}" 
+      community.mysql.mysql_query:
+        login_host: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_host') }}"
+        login_db: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_database') }}"
+        login_user: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_user') }}"
+        login_password: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_password') }}"
+        query:
+          - INSERT INTO appversion (host, application,Unique_instance ,version, Date, Port) VALUES ("{{item.host}}","{{item.application}}","{{item.host}}-{{item.application}}-{{item.port}}","{{item.version}}","{{item.date}}","{{item.port}}")
       loop: "{{ appdata.list }}"
       ignore_errors: true
       register: querystatus
       delegate_to: localhost
+      run_once: true
+
+    - name: Loading timeseries data by Running several insert queries against db "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_database') }}" 
+      community.mysql.mysql_query:
+        login_host: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_host') }}"
+        login_db: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_database') }}"
+        login_user: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_user') }}"
+        login_password: "{{ lookup('hashi_vault', 'secret=secret/data/dev/grafana:db_password') }}"
+        query:
+          - INSERT INTO time_series (app, version, date) VALUES ("{{item.app}}","{{item.version}}",now())
+      loop: "{{ timedata.list }}"
+      ignore_errors: true
+      register: querystatus_time
+      delegate_to: localhost
+      run_once: true      

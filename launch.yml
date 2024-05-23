@@ -1,44 +1,49 @@
 - name: Container testing
-  hosts: all
+  hosts: containers
   become: true
-  gather_facts: false
+  gather_facts: true
+  serial: 1
   tasks:
     - name: Create a /data  directory if it does not exist
       ansible.builtin.file:
         path: /data
         state: directory
-        mode: '0755'        
+        mode: '0755'
+        owner: root 
+        group: root         
 
     - name: Create an application directory for an applications
       ansible.builtin.file:
         path: "/data/{{ item['value']['name'] }}"
         state: directory
         mode: '0755'
+        owner: root 
+        group: root 
       loop: "{{lookup('ansible.builtin.dict',app)}}" 
 
     - name: Genrate the version file to track versions
       ansible.builtin.template:
         src: version.j2
-        dest: "/data/{{ item.value.name }}/version.html"
+        dest: "/data/{{ item['value']['name'] }}/version.html"
       loop: "{{lookup('ansible.builtin.dict',app)}}"
      
     - name: Include selinux role for context setting
       vars:
         selinux_fcontexts:
-          - {target: '/data/{{ item.value.name }}(/.*)?', setype: 'httpd_sys_content_t', state: 'present'}
+          - {target: "/data/{{ item['value']['name'] }}(/.*)?", setype: "httpd_sys_content_t", state: "present"}
       ansible.builtin.include_role:
         name: fedora.linux_system_roles.selinux
       loop: "{{lookup('ansible.builtin.dict',app)}}"  
 
     - name: launch a containers of nginx on different hosts 
       containers.podman.podman_container:
-        name: "nginx_container_{{ item.value.name }}"
+        name: "nginx_container_{{ item['value']['name'] }}"
         image: docker.io/nginx:stable-alpine3.17-slim
         state: started
         ports:
-          - "{{item.value.port}}:80"
+          - "{{item['value']['port']}}:80"
         volumes:
-          - "/data/{{ item.value.name }}:/usr/share/nginx/html:Z"
+          - "/data/{{ item['value']['name'] }}:/usr/share/nginx/html:Z"
         recreate: true
       loop: "{{lookup('ansible.builtin.dict',app)}}"  
 
@@ -46,14 +51,14 @@
     - name: Create HTML index page so it feel good
       ansible.builtin.template:
         src: report.j2
-        dest: "/data/{{ item.value.name }}/index.html"
+        dest: "/data/{{ item['value']['name'] }}/index.html"
         mode: "644"
       loop: "{{lookup('ansible.builtin.dict',app)}}"  
 
     - name: Copy CSS over to "{{inventory_hostname}}"
       ansible.builtin.copy:
         src: "css"
-        dest: "/data/{{ item.value.name }}"
+        dest: "/data/{{ item['value']['name'] }}"
         directory_mode: true
         mode: "775"
       loop: "{{lookup('ansible.builtin.dict',app)}}"
@@ -61,7 +66,7 @@
     - name: Copy images required by the index page
       ansible.builtin.copy:
         src: "{{ item[1] }}"
-        dest: "/data/{{ item[0].value.name }}"
+        dest: "/data/{{ item[0]['value']['name'] }}"
         directory_mode: true
         mode: "644"
       loop: "{{ lookup('ansible.builtin.dict',app) | product(['webpage_logo.png','redhat-ansible-logo.svg']) | list}}" 
@@ -74,24 +79,8 @@
 
     - name: Allow traffic so our application can take traffic
       ansible.posix.firewalld:
-        port: "{{ item.value.port }}/tcp"
+        port: "{{ item['value']['port'] }}/tcp"
         permanent: true
         state: enabled
-      loop: "{{lookup('ansible.builtin.dict',app)}}" 
-
-##### This was written for Testing #####
-  #  - name: Gather facts for all containers
-  #    containers.podman.podman_container_info:
-  #    register: info
-    
-  #  - debug:
-  #      msg: "{{item.Name}}"
-  #    loop: "{{info.containers}}" 
-
-
-#    - debug:
-#        msg: "{{hostvars[inventory_hostname]['app']|map(attribute='name')|list}}"
-
-#    - debug:
-#        msg: "{{item}}"
-#      loop: "{{ hostvars[inventory_hostname]['app']|map(attribute='version')|list}}"  
+        immediate: true
+      loop: "{{lookup('ansible.builtin.dict', app)}}" 
