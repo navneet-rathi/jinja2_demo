@@ -10,6 +10,7 @@
       ansible.builtin.uri:
         url: "http://{{ item['value']['host'] }}:{{item['value']['port']}}/version.html"
         return_content: true
+        timeout: 60
       register: versioninfo
       delegate_to: localhost
       failed_when: versioninfo is failed #or "'version:' not in versioninfo.content"
