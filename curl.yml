@@ -13,7 +13,11 @@
       register: versioninfo
       delegate_to: localhost
       failed_when: versioninfo is failed #or "'version:' not in versioninfo.content"
-      loop: "{{ lookup('ansible.builtin.dict',app) }}"    
+      loop: "{{ lookup('ansible.builtin.dict',app) }}"
+
+## Added for debugging to add a new feature
+    - ansible.builtin.debug:
+        msg: "{{versioninfo}}"      
 
     - name: create an app dir in /tmp inside controller container
       ansible.builtin.file:
