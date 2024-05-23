@@ -8,7 +8,7 @@
   tasks:
     - name: Get the version of avalable application
       ansible.builtin.uri:
-        url: "http://{{ item['value']['host'] }}:{{item.value.port}}/version.html"
+        url: "http://{{ item['value']['host'] }}:{{item['value']['port']}}/version.html"
         return_content: true
       register: versioninfo
       delegate_to: localhost
