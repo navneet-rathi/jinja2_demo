@@ -1,6 +1,6 @@
 ---
 - name: create required infra
-  hosts: aap2.example.com
+  hosts: all
   become: true  
   gather_facts: true
   tasks:
