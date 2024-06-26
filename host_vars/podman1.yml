@@ -3,29 +3,29 @@ app:
     name: app1
     version: v1
     port: 8081
-    host: podman
+    host: podman1
   app3:  
     name: app3
     version: v2
     port: 8083
-    host: podman
+    host: podman1
   app5:
     name: app5
     version: v2
     port: 8085
-    host: podman
+    host: podman1
   app7:
     name: app7  
     version: v2
     port: 8087
-    host: podman
+    host: podman1
   app9:
     name: app9
     version: v5
     port: 8089
-    host: podman    
+    host: podman1  
   app11:
     name: app11
     version: v5
     port: 8091
-    host: podman
+    host: podman1
