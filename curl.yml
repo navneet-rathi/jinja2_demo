@@ -63,7 +63,7 @@
 
     - set_fact:
         db_database: version_data
-        db_host: 192.168.1.18
+        db_host: 192.168.1.16
         db_user: root
         db_password: root
 
