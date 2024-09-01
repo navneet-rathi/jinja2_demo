@@ -6,12 +6,12 @@ app:
     host: podman
   aap3:  
     name: app3
-    version: v1
+    version: v2
     port: 8083
     host: podman
   app5:
     name: app5
-    version: v2
+    version: v4
     port: 8085
     host: podman
   aap7:
@@ -21,6 +21,6 @@ app:
     host: podman
   app11:
     name: app11
-    version: v5
+    version: v3
     port: 8091
     host: podman
